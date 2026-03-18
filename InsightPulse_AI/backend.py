@@ -160,6 +160,7 @@ class GenerateResponse(BaseModel):
     duration_ms: Optional[int] = 0
 
 @app.post("/upload")
+@api_router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     filename = file.filename.lower()
     contents = await file.read()
@@ -169,6 +170,30 @@ async def upload_file(file: UploadFile = File(...)):
         else: raise HTTPException(400, "Unsupported format.")
         _load_dataframe_into_state(df, file.filename)
         return {"status": "success", "filename": file.filename, "rows": len(df)}
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/load-preset")
+@api_router.post("/load-preset")
+async def load_preset(req: dict):
+    dataset_name = req.get("name")
+    if not dataset_name: raise HTTPException(400, "Dataset name required.")
+    
+    # Map friendly names to actual files
+    mapping = {
+        "Amazon Sales.csv": "Amazon Sales.csv",
+        "Insurance Claims.csv": "Copy of India Life Insurance Claims.csv"
+    }
+    target = mapping.get(dataset_name)
+    if not target: raise HTTPException(404, "Preset not found.")
+    
+    path = DATA_DIR / target
+    if not path.exists(): raise HTTPException(404, f"File {target} missing from server data folder.")
+    
+    try:
+        df = _read_csv_resilient(path.read_bytes(), target)
+        _load_dataframe_into_state(df, dataset_name)
+        return {"status": "success", "dataset": dataset_name, "rows": len(df)}
     except Exception as e:
         raise HTTPException(500, str(e))
 

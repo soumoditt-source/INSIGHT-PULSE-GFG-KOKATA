@@ -69,14 +69,36 @@ export function DatasetUploader() {
       
       <div className="flex flex-col gap-2">
         <button
-          onClick={() => { setActiveDataset('Amazon Sales.csv'); window.location.reload(); }}
-          className="w-full py-1.5 px-3 text-[11px] rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 flex items-center gap-2 transition-all"
+          onClick={async () => { 
+            setIsUploading(true);
+            try {
+              const res = await fetch('/api/load-preset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'Amazon Sales.csv' })
+              });
+              if (res.ok) window.location.reload();
+            } finally { setIsUploading(false); }
+          }}
+          disabled={isUploading}
+          className="w-full py-1.5 px-3 text-[11px] rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 flex items-center gap-2 transition-all disabled:opacity-50"
         >
           📦 Load Amazon Dataset
         </button>
         <button
-          onClick={() => { setActiveDataset('Insurance Claims.csv'); window.location.reload(); }}
-          className="w-full py-1.5 px-3 text-[11px] rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 flex items-center gap-2 transition-all"
+          onClick={async () => { 
+            setIsUploading(true);
+            try {
+              const res = await fetch('/api/load-preset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: 'Insurance Claims.csv' })
+              });
+              if (res.ok) window.location.reload();
+            } finally { setIsUploading(false); }
+          }}
+          disabled={isUploading}
+          className="w-full py-1.5 px-3 text-[11px] rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 flex items-center gap-2 transition-all disabled:opacity-50"
         >
           🛡️ Load Insurance Dataset
         </button>
