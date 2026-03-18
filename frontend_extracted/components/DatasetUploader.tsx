@@ -11,7 +11,7 @@ export function DatasetUploader() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:8000/health')
+        const res = await fetch('/api/health')
         if (res.ok) {
           const data = await res.json()
           if (data.dataset_loaded) {
@@ -38,7 +38,7 @@ export function DatasetUploader() {
     formData.append('file', file)
 
     try {
-      const res = await fetch('http://localhost:8000/upload', {
+      const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       })
@@ -46,8 +46,6 @@ export function DatasetUploader() {
       if (res.ok) {
         setMessage(`✅ ${data.rows || 0} rows loaded!`)
         setActiveDataset(file.name)
-        // GLOBAL SYNC: Force reload to ensure all tabs (Map, Profiler, Chat) 
-        // fetch the NEW app_state immediately. This is the 'finest' 11/10 sync.
         setTimeout(() => window.location.reload(), 1500)
       } else {
         setMessage(`❌ ${data.detail || 'Upload failed'}`)
@@ -68,6 +66,24 @@ export function DatasetUploader() {
         <span>Active Dataset</span>
         {activeDataset && <span className="text-cyan-400 capitalize bg-cyan-950/30 px-2 py-0.5 rounded border border-cyan-800/30 truncate max-w-[120px]">{activeDataset}</span>}
       </div>
+      
+      <div className="flex flex-col gap-2">
+        <button
+          onClick={() => { setActiveDataset('Amazon Sales.csv'); window.location.reload(); }}
+          className="w-full py-1.5 px-3 text-[11px] rounded bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 flex items-center gap-2 transition-all"
+        >
+          📦 Load Amazon Dataset
+        </button>
+        <button
+          onClick={() => { setActiveDataset('Insurance Claims.csv'); window.location.reload(); }}
+          className="w-full py-1.5 px-3 text-[11px] rounded bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 flex items-center gap-2 transition-all"
+        >
+          🛡️ Load Insurance Dataset
+        </button>
+      </div>
+
+      <div className="h-px bg-border/20 my-1" />
+
       <input
         type="file"
         accept=".csv,.xlsx,.xls"
@@ -84,7 +100,7 @@ export function DatasetUploader() {
           <span className="animate-pulse">Injecting Data...</span>
         ) : (
           <>
-            <span className="text-base">⏏️</span> Inject CSV / Excel
+            <span className="text-base">⏏️</span> Inject Custom CSV
           </>
         )}
       </button>
