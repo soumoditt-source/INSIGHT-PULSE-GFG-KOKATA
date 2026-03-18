@@ -26,13 +26,13 @@ export default function PresentationPage() {
         query: query,
         chat_history: []
       })
-      if (res.data && res.data.slides) {
+      if (res.data?.slides) {
         setSlides(res.data.slides)
       } else {
         console.error("No slides returned", res.data)
       }
     } catch (e) {
-      console.error("Presentation generation failed")
+      console.error("Presentation generation failed", e)
     } finally {
       setLoading(false)
     }
@@ -78,7 +78,7 @@ export default function PresentationPage() {
 
           <div className="grid grid-cols-1 gap-12 mt-12">
             {slides.map((slide, i) => (
-              <GlassCard key={i} className="min-h-[400px] flex flex-col p-12 border-indigo-500/30">
+              <GlassCard key={slide.title || `slide-${i}`} className="min-h-[400px] flex flex-col p-12 border-indigo-500/30">
                 <div className="flex justify-between items-start mb-8">
                   <h2 className="text-3xl font-bold font-outfit text-indigo-100">{slide.title}</h2>
                   <span className="text-xs font-mono text-indigo-400 opacity-50">SLIDE {i + 1}</span>
@@ -94,7 +94,7 @@ export default function PresentationPage() {
                   {slide.type === 'bullets' && (
                     <ul className="space-y-4">
                       {slide.content.map((bullet: string, j: number) => (
-                        <li key={j} className="flex gap-3 text-lg text-indigo-50/90">
+                        <li key={`bullet-${i}-${j}`} className="flex gap-3 text-lg text-indigo-50/90">
                           <span className="text-indigo-500 mt-1.5">•</span>
                           {bullet}
                         </li>

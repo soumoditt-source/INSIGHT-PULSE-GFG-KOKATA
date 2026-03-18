@@ -4,8 +4,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { Topbar } from '@/components/Topbar'
 import { StarField } from '@/components/StarField'
 import { GlowingOrbs } from '@/components/GlowingOrbs'
-import { BentoGrid, BentoGridItem } from '@/components/BentoGrid'
-import { NeonBadge } from '@/components/NeonBadge'
+import { BentoGridItem, BentoGrid } from '@/components/BentoGrid'
 import { MetricCard } from '@/components/MetricCard'
 import { HeroSection } from '@/components/HeroSection'
 import Link from 'next/link'
@@ -13,26 +12,23 @@ import { useEffect } from 'react'
 
 export default function Home() {
   useEffect(() => {
+    const speakWelcome = (msg: SpeechSynthesisUtterance) => {
+      let voices = globalThis.speechSynthesis.getVoices();
+      let fVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google US English'));
+      if (fVoice) msg.voice = fVoice;
+      globalThis.speechSynthesis.speak(msg);
+    };
+
     const greet = () => {
-      if ('speechSynthesis' in window) {
+      if ('speechSynthesis' in globalThis) {
         setTimeout(() => {
           const msg = new SpeechSynthesisUtterance(
             "Welcome to Insight Pulse AI. The ultimate neural data intelligence platform. I am ready to perform a detail analysis on your data with supreme accuracy."
           );
           msg.lang = 'en-US';
           msg.pitch = 1.2;
-          msg.rate = 1.0;
-          
-          let voices = window.speechSynthesis.getVoices();
-          let femaleVoice = voices.find(v => 
-            v.name.includes('Female') || 
-            v.name.includes('Samantha') || 
-            v.name.includes('Google US English') ||
-            v.name.includes('Zira')
-          );
-          if (femaleVoice) msg.voice = femaleVoice;
-          
-          window.speechSynthesis.speak(msg);
+          msg.rate = 1;
+          speakWelcome(msg);
         }, 500);
       }
     };
@@ -40,20 +36,20 @@ export default function Home() {
     // Autoplay policy bypass: trigger on first user interaction
     const handleInteraction = () => {
       greet();
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('scroll', handleInteraction);
+      globalThis.removeEventListener('click', handleInteraction);
+      globalThis.removeEventListener('scroll', handleInteraction);
     };
-    window.addEventListener('click', handleInteraction);
-    window.addEventListener('scroll', handleInteraction);
+    globalThis.addEventListener('click', handleInteraction);
+    globalThis.addEventListener('scroll', handleInteraction);
     
     // Try to load voices early
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
+    if ('speechSynthesis' in globalThis) {
+      globalThis.speechSynthesis.getVoices();
     }
     
     return () => {
-      window.removeEventListener('click', handleInteraction);
-      window.removeEventListener('scroll', handleInteraction);
+      globalThis.removeEventListener('click', handleInteraction);
+      globalThis.removeEventListener('scroll', handleInteraction);
     };
   }, []);
 
@@ -71,7 +67,7 @@ export default function Home() {
           <HeroSection />
 
           {/* Live Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-slide-up [animation-delay:200ms]">
             <MetricCard
               label="Data Points Processed"
               value="2.4B"
@@ -146,7 +142,7 @@ export default function Home() {
                     <span className="text-emerald-400 font-semibold">95%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                    <div className="h-full w-[95%] bg-gradient-to-r from-emerald-500 to-teal-500" />
+                    <div className="h-full w-[95%] bg-linear-to-r from-emerald-500 to-teal-500" />
                   </div>
                 </div>
               </BentoGridItem>
@@ -187,7 +183,7 @@ export default function Home() {
           </div>
 
           {/* CTA Section */}
-          <div className="glass rounded-lg p-12 border border-indigo-500/30 text-center space-y-6 mt-16 animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <div className="glass rounded-lg p-12 border border-indigo-500/30 text-center space-y-6 mt-16 animate-slide-up [animation-delay:400ms]">
             <h2 className="text-3xl font-bold font-outfit">Ready to Transform Your Data?</h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
               Join thousands of organizations using InsightPulse AI to unlock actionable insights from their data.

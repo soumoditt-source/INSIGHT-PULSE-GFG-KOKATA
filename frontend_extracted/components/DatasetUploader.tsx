@@ -77,7 +77,7 @@ export function DatasetUploader() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: 'Amazon Sales.csv' })
               });
-              if (res.ok) window.location.reload();
+              if (res.ok) globalThis.location.reload();
             } finally { setIsUploading(false); }
           }}
           disabled={isUploading}
@@ -94,7 +94,7 @@ export function DatasetUploader() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: 'Insurance Claims.csv' })
               });
-              if (res.ok) window.location.reload();
+              if (res.ok) globalThis.location.reload();
             } finally { setIsUploading(false); }
           }}
           disabled={isUploading}
@@ -108,6 +108,8 @@ export function DatasetUploader() {
 
       <input
         type="file"
+        title="Upload Dataset"
+        placeholder="Upload Dataset"
         accept=".csv,.xlsx,.xls,.pdf,.docx,.pptx"
         className="hidden"
         ref={fileInputRef}
@@ -116,7 +118,7 @@ export function DatasetUploader() {
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
-        className="w-full py-2 flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/40 hover:to-purple-500/40 border border-indigo-500/30 text-indigo-100 transition-all font-medium text-sm shadow-glow hover:shadow-glow-lg disabled:opacity-50"
+        className="w-full py-2 flex items-center justify-center gap-2 rounded-md bg-linear-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/40 hover:to-purple-500/40 border border-indigo-500/30 text-indigo-100 transition-all font-medium text-sm shadow-glow hover:shadow-glow-lg disabled:opacity-50"
       >
         {isUploading ? (
           <span className="animate-pulse">Injecting Data...</span>

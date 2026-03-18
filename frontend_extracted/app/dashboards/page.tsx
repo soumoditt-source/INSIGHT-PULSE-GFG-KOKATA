@@ -1,49 +1,89 @@
 'use client'
 
+import React, { useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/Sidebar'
 import { Topbar } from '@/components/Topbar'
 import { StarField } from '@/components/StarField'
 import { GlowingOrbs } from '@/components/GlowingOrbs'
-import { BentoGrid, BentoGridItem } from '@/components/BentoGrid'
 import { GlassCard } from '@/components/GlassCard'
 import { NeonBadge } from '@/components/NeonBadge'
-import { ChartPlaceholder } from '@/components/ChartPlaceholder'
+import { LoadingState } from '@/components/LoadingState'
+import { apiClient } from '@/lib/api'
+import dynamic from 'next/dynamic'
+
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false })
 
 export default function DashboardsPage() {
-  const dashboards = [
-    {
-      id: 1,
-      name: 'Sales Overview',
-      description: '4 charts • Updated 2min ago',
-      icon: '📊',
-      charts: 4,
-      lastUpdate: '2 min',
-    },
-    {
-      id: 2,
-      name: 'Customer Analytics',
-      description: '6 charts • Updated 15min ago',
-      icon: '👥',
-      charts: 6,
-      lastUpdate: '15 min',
-    },
-    {
-      id: 3,
-      name: 'Performance Metrics',
-      description: '3 charts • Updated just now',
-      icon: '⚡',
-      charts: 3,
-      lastUpdate: 'now',
-    },
-    {
-      id: 4,
-      name: 'Geographic Distribution',
-      description: '5 charts • Updated 8min ago',
-      icon: '🗺️',
-      charts: 5,
-      lastUpdate: '8 min',
-    },
-  ]
+  const [loading, setLoading] = useState(true)
+  const [health, setHealth] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [distributions, setDistributions] = useState<any>(null)
+  const [forecast, setForecast] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const fetchAll = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const h = await apiClient.getSystemStatus()
+      setHealth(h)
+      if (h?.dataset_loaded) {
+        const [p, d, f] = await Promise.allSettled([
+          apiClient.getProfile(),
+          apiClient.getDistributions(),
+          apiClient.getForecast(),
+        ])
+        if (p.status === 'fulfilled') setProfile(p.value)
+        if (d.status === 'fulfilled') setDistributions(d.value)
+        if (f.status === 'fulfilled') setForecast(f.value)
+      }
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchAll() }, [])
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      await apiClient.uploadDataset(file)
+      await fetchAll()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const loadPreset = async (name: string) => {
+    setUploading(true)
+    try {
+      await fetch('/api/load-preset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      await fetchAll()
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const commonLayout = {
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'rgba(0,0,0,0.2)',
+    font: { color: '#a5b4fc', size: 11 },
+    margin: { t: 30, b: 40, l: 50, r: 20 },
+    xaxis: { gridcolor: 'rgba(255,255,255,0.05)', color: '#6366f1' },
+    yaxis: { gridcolor: 'rgba(255,255,255,0.05)', color: '#6366f1' },
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -54,106 +94,138 @@ export default function DashboardsPage() {
 
       <main className="ml-64 mt-16 p-8 relative z-2">
         <div className="max-w-7xl mx-auto space-y-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
               <NeonBadge variant="indigo">SMART DASHBOARDS</NeonBadge>
+              <h1 className="text-4xl font-bold font-outfit">Live Dashboards</h1>
+              <p className="text-muted-foreground">Real-time intelligence from your active dataset.</p>
             </div>
-            <h1 className="text-4xl font-bold font-outfit">Dashboards</h1>
-            <p className="text-muted-foreground">Create and manage custom intelligence boards</p>
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={() => loadPreset('Amazon Sales.csv')} disabled={uploading} className="px-4 py-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 text-sm transition-all disabled:opacity-50">
+                📦 Amazon Data
+              </button>
+              <button onClick={() => loadPreset('Insurance Claims.csv')} disabled={uploading} className="px-4 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-sm transition-all disabled:opacity-50">
+                🛡️ Insurance Data
+              </button>
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="px-4 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm font-medium transition-all disabled:opacity-50">
+                {uploading ? '⏳ Loading...' : '⏏️ Upload Dataset'}
+              </button>
+              <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls,.pdf" title="Upload Dataset" placeholder="Upload Dataset" className="hidden" onChange={handleUpload} />
+              <button onClick={fetchAll} disabled={loading} className="px-4 py-2 rounded-lg glass hover:glass-hover border border-border/50 text-sm transition-all disabled:opacity-50">
+                🔄 Refresh
+              </button>
+            </div>
           </div>
 
-          <div className="flex gap-3">
-            <button className="px-6 py-3 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white font-medium transition-all duration-300 shadow-glow">
-              Create Dashboard
-            </button>
-            <button className="px-6 py-3 rounded-lg glass hover:glass-hover border border-border/50 font-medium transition-all duration-300">
-              Import Template
-            </button>
-          </div>
+          {error && (
+            <div className="p-4 rounded-lg glass border border-red-500/30 text-red-300 text-sm">🚨 {error}</div>
+          )}
 
-          {/* Dashboard Grid */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold font-outfit">Your Dashboards</h2>
-            <BentoGrid>
-              {dashboards.map((dashboard, i) => (
-                <BentoGridItem
-                  key={dashboard.id}
-                  index={i}
-                  title={dashboard.name}
-                  description={dashboard.description}
-                  icon={dashboard.icon}
-                  onClick={() => console.log(`Opening ${dashboard.name}`)}
-                >
-                  <div className="mt-4 text-xs text-muted-foreground space-y-2">
-                    <div>
-                      <p className="text-muted-foreground">Charts: <span className="text-cyan-400">{dashboard.charts}</span></p>
-                    </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-border/30">
-                      <span>Last Updated</span>
-                      <span className="text-indigo-400">{dashboard.lastUpdate}</span>
-                    </div>
+          {loading ? (
+            <div className="py-24 flex justify-center"><LoadingState message="Loading live dataset intelligence..." /></div>
+          ) : !health?.dataset_loaded ? (
+            <GlassCard glow={true} className="border border-indigo-500/30 text-center py-20 space-y-6">
+              <div className="text-6xl">📊</div>
+              <h2 className="text-2xl font-bold font-outfit">No Dataset Loaded</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">Load a preset dataset or upload your own CSV/Excel file to generate live dashboard charts powered by real data.</p>
+              <div className="flex gap-4 justify-center flex-wrap">
+                <button onClick={() => loadPreset('Amazon Sales.csv')} className="px-6 py-3 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white font-medium transition-all shadow-glow">📦 Load Amazon Dataset</button>
+                <button onClick={() => loadPreset('Insurance Claims.csv')} className="px-6 py-3 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-white font-medium transition-all">🛡️ Load Insurance Dataset</button>
+                <button onClick={() => fileInputRef.current?.click()} className="px-6 py-3 rounded-lg glass hover:glass-hover border border-border/50 font-medium transition-all">⏏️ Upload Custom CSV</button>
+              </div>
+            </GlassCard>
+          ) : (
+            <>
+              {/* Summary Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Total Records', value: health?.rows?.toLocaleString() ?? '0', icon: '📊' },
+                  { label: 'Dataset', value: health?.dataset_name ?? 'Loaded', icon: '📁' },
+                  { label: 'Data Quality', value: `${profile?.data_quality_score?.score ?? '—'}/100`, icon: '✓' },
+                  { label: 'Geo Points', value: Object.keys(health?.geo_detected ?? {}).length > 0 ? 'Detected' : 'None', icon: '🗺️' },
+                ].map(({ label, value, icon }) => (
+                  <GlassCard key={label} className="border border-white/5 text-center py-4">
+                    <div className="text-2xl mb-1">{icon}</div>
+                    <p className="text-xl font-bold font-outfit text-indigo-200">{value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{label}</p>
+                  </GlassCard>
+                ))}
+              </div>
+
+              {/* Distribution Charts */}
+              {distributions && Object.keys(distributions).length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold font-outfit">Distribution Analysis</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Object.entries(distributions).slice(0, 4).map(([col, distData]: [string, any]) => (
+                      <GlassCard key={col} className="border border-indigo-500/20 p-4" glow={true}>
+                        <h3 className="text-sm font-semibold text-indigo-300 mb-3">{col}</h3>
+                        {distData?.type === 'numeric' ? (
+                          <Plot
+                            data={[{
+                              type: 'bar',
+                              x: distData.bins,
+                              y: distData.counts,
+                              marker: { color: 'rgba(99,102,241,0.7)', line: { color: 'rgba(99,102,241,1)', width: 1 } },
+                            }]}
+                            layout={{ ...commonLayout, height: 220, title: '' }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%' }}
+                          />
+                        ) : (
+                          <Plot
+                            data={[{
+                              type: 'bar',
+                              x: distData?.labels ?? [],
+                              y: distData?.values ?? [],
+                              marker: { color: 'rgba(168,85,247,0.7)', line: { color: 'rgba(168,85,247,1)', width: 1 } },
+                            }]}
+                            layout={{ ...commonLayout, height: 220, title: '' }}
+                            config={{ displayModeBar: false, responsive: true }}
+                            style={{ width: '100%' }}
+                          />
+                        )}
+                      </GlassCard>
+                    ))}
                   </div>
-                </BentoGridItem>
-              ))}
-            </BentoGrid>
-          </div>
-
-          {/* Featured Dashboard */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold font-outfit">Sales Overview Dashboard</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-[300px]">
-              <div className="animate-slide-up">
-                <ChartPlaceholder title="Monthly Sales" type="line" />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                <ChartPlaceholder title="Sales by Category" type="bar" />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                <ChartPlaceholder title="Top Performers" type="bar" />
-              </div>
-              <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <ChartPlaceholder title="Revenue Trend" type="line" />
-              </div>
-            </div>
-          </div>
-
-          {/* Dashboard Settings */}
-          <GlassCard glow={true}>
-            <h3 className="text-lg font-bold font-outfit mb-4">Dashboard Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-border/30">
-                <div>
-                  <p className="font-medium">Auto-refresh</p>
-                  <p className="text-xs text-muted-foreground">Update every 5 minutes</p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" value="" className="sr-only peer" defaultChecked />
-                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-500/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600" />
-                </label>
-              </div>
+              )}
 
-              <div className="flex items-center justify-between pb-4 border-b border-border/30">
-                <div>
-                  <p className="font-medium">Share Dashboard</p>
-                  <p className="text-xs text-muted-foreground">Allow others to view</p>
+              {/* Forecast Chart */}
+              {forecast?.fig_json && (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold font-outfit">Forecasting & Trend</h2>
+                  <GlassCard glow={true} className="border border-purple-500/20 p-4">
+                    <Plot
+                      data={JSON.parse(forecast.fig_json).data}
+                      layout={{ ...commonLayout, ...JSON.parse(forecast.fig_json).layout, height: 350 }}
+                      config={{ displayModeBar: false, responsive: true }}
+                      style={{ width: '100%' }}
+                    />
+                  </GlassCard>
                 </div>
-                <button className="px-4 py-2 rounded-lg glass hover:glass-hover border border-border/50 text-sm">
-                  Configure
-                </button>
-              </div>
+              )}
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Export Data</p>
-                  <p className="text-xs text-muted-foreground">Download as CSV or PDF</p>
-                </div>
-                <button className="px-4 py-2 rounded-lg glass hover:glass-hover border border-border/50 text-sm">
-                  Export
-                </button>
-              </div>
-            </div>
-          </GlassCard>
+              {/* Missing Values */}
+              {profile?.missing_values && (
+                <GlassCard glow={true} className="border border-cyan-500/20">
+                  <h3 className="text-lg font-bold font-outfit mb-4 text-cyan-100">Data Quality — Missing Values Matrix</h3>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {Object.entries(profile.missing_values).length === 0 ? (
+                      <div className="text-center text-emerald-400 font-medium p-4">✨ Pristine Dataset — No missing values!</div>
+                    ) : (
+                      Object.entries(profile.missing_values).map(([col, count]: [string, any]) => (
+                        <div key={col} className="flex justify-between items-center p-3 bg-black/30 rounded-lg border border-white/5">
+                          <span className="font-mono text-sm text-indigo-300">{col}</span>
+                          <span className="text-sm font-semibold text-rose-400">{count} missing</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </GlassCard>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>

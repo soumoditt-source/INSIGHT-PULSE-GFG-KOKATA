@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Sidebar } from '@/components/Sidebar'
 import { Topbar } from '@/components/Topbar'
 import { StarField } from '@/components/StarField'
@@ -18,6 +18,16 @@ export default function MLLabPage() {
   const [loading, setLoading] = useState(false)
   const [mlData, setMlData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [datasetLoaded, setDatasetLoaded] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    // Check if dataset is already loaded
+    apiClient.getSystemStatus().then((h: any) => {
+      setDatasetLoaded(h?.dataset_loaded ?? false)
+    }).catch(() => {})
+  }, [])
 
   const runAnalysis = async () => {
     setLoading(true)
@@ -29,6 +39,34 @@ export default function MLLabPage() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      await apiClient.uploadDataset(file)
+      setDatasetLoaded(true)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const loadPreset = async (name: string) => {
+    setUploading(true)
+    try {
+      await fetch('/api/load-preset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      setDatasetLoaded(true)
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -57,17 +95,29 @@ export default function MLLabPage() {
               <h1 className="text-4xl font-bold font-outfit">ML Laboratory</h1>
               <p className="text-muted-foreground">Auto-detect Deep Analytics: Classification, Regression & Clustering.</p>
             </div>
-            <button 
-              onClick={runAnalysis}
-              disabled={loading}
-              className="px-6 py-3 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow transition-all flex items-center justify-center disabled:opacity-50"
-            >
-              {loading ? (
-                <span className="animate-pulse">Running Neural Engine...</span>
-              ) : (
-                <>Run AutoML Analysis 🚀</>
-              )}
-            </button>
+            <div className="flex gap-3 flex-wrap">
+              <button onClick={() => loadPreset('Amazon Sales.csv')} disabled={uploading} className="px-4 py-2 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 text-sm transition-all disabled:opacity-50">
+                {uploading ? '⏳ Loading...' : '📦 Amazon Data'}
+              </button>
+              <button onClick={() => loadPreset('Insurance Claims.csv')} disabled={uploading} className="px-4 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-300 text-sm transition-all disabled:opacity-50">
+                🛡️ Insurance
+              </button>
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="px-4 py-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm transition-all disabled:opacity-50">
+                ⏏️ Upload CSV
+              </button>
+              <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" title="Upload Dataset" placeholder="Upload Dataset" className="hidden" onChange={handleUpload} />
+              <button 
+                onClick={runAnalysis}
+                disabled={loading || uploading}
+                className="px-6 py-3 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white shadow-glow transition-all flex items-center justify-center disabled:opacity-50"
+              >
+                {loading ? (
+                  <span className="animate-pulse">Running Neural Engine...</span>
+                ) : (
+                  <>Run AutoML Analysis 🚀</>
+                )}
+              </button>
+            </div>
           </div>
 
           {error && (

@@ -39,11 +39,16 @@ from core.sql_executor import init_connection, dataframe_to_records
 from core.agent import run_agentic_pipeline
 from crm.crm_db import log_query, init_db
 
+# ── Global Constants
+AMAZON_CSV = "Amazon Sales.csv"
+INSURANCE_CSV = "Copy of India Life Insurance Claims.csv"
+NO_DATA_MSG = "No dataset."
+
 # ── Default dataset paths (Now inside the Python lambda package)
 DATA_DIR = Path(__file__).parent / "data"
 DEFAULT_CSVS = [
-    DATA_DIR / "Amazon Sales.csv",
-    DATA_DIR / "Copy of India Life Insurance Claims.csv",
+    DATA_DIR / AMAZON_CSV,
+    DATA_DIR / INSURANCE_CSV,
 ]
 
 # ═══════════════════════════════════════════════════════════════════
@@ -125,7 +130,7 @@ def _set_active_dataset(name: str, data: bytes = None):
         Path("/tmp/active_dataset.txt").write_text(name)
         if data:
             (Path("/tmp") / name).write_bytes(data)
-    except:
+    except OSError:
         pass
 
 def _ensure_dataset_loaded():
@@ -144,8 +149,8 @@ def _ensure_dataset_loaded():
             
             # Check if it was a preset
             mapping = {
-                "Amazon Sales.csv": "Amazon Sales.csv",
-                "Insurance Claims.csv": "Copy of India Life Insurance Claims.csv"
+                AMAZON_CSV: AMAZON_CSV,
+                "Insurance Claims.csv": INSURANCE_CSV
             }
             target = mapping.get(active_name)
             if target and (DATA_DIR / target).exists():
@@ -182,14 +187,14 @@ async def health():
 @api_router.get("/schema")
 async def get_schema():
     _ensure_dataset_loaded()
-    if not app_state["schema_json"]: raise HTTPException(404, "No dataset loaded.")
+    if not app_state["schema_json"]: raise HTTPException(404, NO_DATA_MSG)
     return app_state["schema_json"]
 
 @app.get("/profile")
 @api_router.get("/profile")
 async def get_profile():
     _ensure_dataset_loaded()
-    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    if app_state["df"] is None: raise HTTPException(404, NO_DATA_MSG)
     return app_state["profile"] or profile_dataset(app_state["df"])
 
 class GenerateRequest(BaseModel):
@@ -236,8 +241,8 @@ async def load_preset(req: dict):
     
     # Map friendly names to actual files
     mapping = {
-        "Amazon Sales.csv": "Amazon Sales.csv",
-        "Insurance Claims.csv": "Copy of India Life Insurance Claims.csv"
+        AMAZON_CSV: AMAZON_CSV,
+        "Insurance Claims.csv": INSURANCE_CSV
     }
     target = mapping.get(dataset_name)
     if not target: raise HTTPException(404, "Preset not found.")
@@ -257,7 +262,7 @@ async def load_preset(req: dict):
 @api_router.post("/generate", response_model=GenerateResponse)
 async def generate(req: GenerateRequest):
     _ensure_dataset_loaded()
-    if app_state["df"] is None: return GenerateResponse(error="No dataset.")
+    if app_state["df"] is None: return GenerateResponse(error=NO_DATA_MSG)
     t0 = time.time()
     result = run_agentic_pipeline(req.query, app_state["schema_json"], app_state["sample_rows"], req.chat_history)
     dur = int((time.time() - t0) * 1000)
@@ -285,7 +290,7 @@ async def generate(req: GenerateRequest):
 @api_router.get("/forecast")
 async def forecast():
     _ensure_dataset_loaded()
-    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    if app_state["df"] is None: raise HTTPException(404, NO_DATA_MSG)
     df = app_state["df"]
     d_cols = [c for c in df.columns if any(x in c.lower() for x in ["date", "time"])]
     v_cols = [c for c in df.columns if df[c].dtype in (np.float64, np.int64) and "id" not in c.lower()]
@@ -314,7 +319,7 @@ async def forecast():
 @api_router.get("/distributions")
 async def distributions():
     _ensure_dataset_loaded()
-    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    if app_state["df"] is None: raise HTTPException(404, NO_DATA_MSG)
     return compute_distributions(app_state["df"])
 
 @app.get("/api/sample-queries")
@@ -326,7 +331,7 @@ async def sample_queries():
 @api_router.post("/presentation")
 async def presentation(req: dict):
     _ensure_dataset_loaded()
-    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    if app_state["df"] is None: raise HTTPException(404, NO_DATA_MSG)
     query = req.get("query", "Summarize findings")
     try:
         # Generate genuine intelligence using the LLM & SQL reasoning pipeline
@@ -359,7 +364,7 @@ async def presentation(req: dict):
 @api_router.post("/analyze")
 async def analyze(req: dict):
     _ensure_dataset_loaded()
-    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    if app_state["df"] is None: raise HTTPException(404, NO_DATA_MSG)
     task = req.get("task", "auto")
     df = app_state["df"]
     
