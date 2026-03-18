@@ -230,7 +230,11 @@ def compute_classification_metrics(df: pd.DataFrame, target_col: str,
         }
 
     except ImportError:
-        return {"error": "scikit-learn not installed. Run: pip install scikit-learn"}
+        return {
+            "error": "ML Lab (scikit-learn) is disabled in this serverless instance to maintain 11/10 speed. Use local mode for full training.",
+            "metrics": {"accuracy": 0.0, "f1_score": 0.0},
+            "status": "offline"
+        }
     except Exception as e:
         return {"error": f"ML computation failed: {str(e)}"}
 

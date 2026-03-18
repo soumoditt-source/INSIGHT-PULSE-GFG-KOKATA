@@ -1,12 +1,7 @@
 fastapi
-uvicorn
 pandas
 numpy
 google-generativeai
 python-dotenv
-scikit-learn
 duckdb
 plotly
-python-pptx
-pypdf
-openpyxl
