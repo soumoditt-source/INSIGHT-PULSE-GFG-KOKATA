@@ -113,6 +113,43 @@ def _load_default_dataset() -> bool:
                 print(f"[WARN] {csv_path.name} load failed: {e}")
     return False
 
+def _set_active_dataset(name: str, data: bytes = None):
+    try:
+        Path("/tmp/active_dataset.txt").write_text(name)
+        if data:
+            (Path("/tmp") / name).write_bytes(data)
+    except:
+        pass
+
+def _ensure_dataset_loaded():
+    if app_state["df"] is not None:
+        return
+    try:
+        active_txt = Path("/tmp/active_dataset.txt")
+        if active_txt.exists():
+            active_name = active_txt.read_text().strip()
+            # Check if it was a custom upload
+            custom_path = Path("/tmp") / active_name
+            if custom_path.exists():
+                df = _read_csv_resilient(custom_path.read_bytes(), active_name)
+                _load_dataframe_into_state(df, active_name)
+                return
+            
+            # Check if it was a preset
+            mapping = {
+                "Amazon Sales.csv": "Amazon Sales.csv",
+                "Insurance Claims.csv": "Copy of India Life Insurance Claims.csv"
+            }
+            target = mapping.get(active_name)
+            if target and (DATA_DIR / target).exists():
+                df = _read_csv_resilient((DATA_DIR / target).read_bytes(), target)
+                _load_dataframe_into_state(df, active_name)
+                return
+    except Exception as e:
+        print(f"[WARN] Failed to load from /tmp cache: {e}")
+    # Fallback to default
+    _load_default_dataset()
+
 # ═══════════════════════════════════════════════════════════════════
 # Endpoints
 # ═══════════════════════════════════════════════════════════════════
@@ -125,6 +162,7 @@ async def startup():
 @app.get("/health")
 @api_router.get("/health")
 async def health():
+    _ensure_dataset_loaded()
     df = app_state["df"]
     return {
         "status": "healthy",
@@ -136,12 +174,14 @@ async def health():
 @app.get("/schema")
 @api_router.get("/schema")
 async def get_schema():
+    _ensure_dataset_loaded()
     if not app_state["schema_json"]: raise HTTPException(404, "No dataset loaded.")
     return app_state["schema_json"]
 
 @app.get("/profile")
 @api_router.get("/profile")
 async def get_profile():
+    _ensure_dataset_loaded()
     if app_state["df"] is None: raise HTTPException(404, "No dataset.")
     return app_state["profile"] or profile_dataset(app_state["df"])
 
@@ -168,6 +208,7 @@ async def upload_file(file: UploadFile = File(...)):
         if filename.endswith(".csv"): df = _read_csv_resilient(contents, file.filename)
         elif filename.endswith((".xlsx", ".xls")): df = pd.read_excel(io.BytesIO(contents))
         else: raise HTTPException(400, "Unsupported format.")
+        _set_active_dataset(file.filename, contents)
         _load_dataframe_into_state(df, file.filename)
         return {"status": "success", "filename": file.filename, "rows": len(df)}
     except Exception as e:
@@ -191,6 +232,7 @@ async def load_preset(req: dict):
     if not path.exists(): raise HTTPException(404, f"File {target} missing from server data folder.")
     
     try:
+        _set_active_dataset(dataset_name)
         df = _read_csv_resilient(path.read_bytes(), target)
         _load_dataframe_into_state(df, dataset_name)
         return {"status": "success", "dataset": dataset_name, "rows": len(df)}
@@ -200,6 +242,7 @@ async def load_preset(req: dict):
 @app.post("/generate", response_model=GenerateResponse)
 @api_router.post("/generate", response_model=GenerateResponse)
 async def generate(req: GenerateRequest):
+    _ensure_dataset_loaded()
     if app_state["df"] is None: return GenerateResponse(error="No dataset.")
     t0 = time.time()
     result = run_agentic_pipeline(req.query, app_state["schema_json"], app_state["sample_rows"], req.chat_history)
@@ -227,6 +270,7 @@ async def generate(req: GenerateRequest):
 @app.get("/forecast")
 @api_router.get("/forecast")
 async def forecast():
+    _ensure_dataset_loaded()
     if app_state["df"] is None: raise HTTPException(404, "No dataset.")
     df = app_state["df"]
     d_cols = [c for c in df.columns if any(x in c.lower() for x in ["date", "time"])]
@@ -255,6 +299,7 @@ async def forecast():
 @app.get("/api/distributions")
 @api_router.get("/distributions")
 async def distributions():
+    _ensure_dataset_loaded()
     if app_state["df"] is None: raise HTTPException(404, "No dataset.")
     return compute_distributions(app_state["df"])
 
@@ -262,6 +307,46 @@ async def distributions():
 @api_router.get("/sample-queries")
 async def sample_queries():
     return [{"query": "Top 10 categories", "icon": "📊"}]
+
+@app.post("/presentation")
+@api_router.post("/presentation")
+async def presentation(req: dict):
+    _ensure_dataset_loaded()
+    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    query = req.get("query", "Summarize findings")
+    try:
+        data = generate_presentation_json(query, app_state["schema_json"], app_state["sample_rows"])
+        return data
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+@app.post("/analyze")
+@api_router.post("/analyze")
+async def analyze(req: dict):
+    _ensure_dataset_loaded()
+    if app_state["df"] is None: raise HTTPException(404, "No dataset.")
+    task = req.get("task", "auto")
+    df = app_state["df"]
+    
+    # Auto-detect if not specified
+    if task == "auto":
+        detection = detect_task_type(df)
+        task = detection["task"]
+        target = detection.get("target_col")
+    else:
+        target = req.get("target")
+
+    try:
+        if task == "binary_classification" or task == "multiclass_classification":
+            return compute_classification_metrics(df, target)
+        elif task == "regression":
+            return compute_regression_metrics(df, target)
+        elif task == "clustering":
+            return compute_clustering(df)
+        else:
+            return profile_dataset(df)
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 app.include_router(api_router)
 

@@ -93,7 +93,7 @@ export function ChatUI({ onSendMessage, onResponseReceived, isLoading = false }:
       }
 
       // 💥 ACTUAL BACKEND CALL 💥
-      const response = await axios.post('http://localhost:8000/generate', {
+      const response = await axios.post('/api/generate', {
         query: userText,
         session_id: 'jarvis-frontend-session',
         chat_history: messages.map(m => ({

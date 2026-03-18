@@ -1,7 +1,7 @@
 // API Service Layer for InsightPulse AI
 // This service handles all backend communication
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api'
 
 export class APIClient {
   private baseURL: string

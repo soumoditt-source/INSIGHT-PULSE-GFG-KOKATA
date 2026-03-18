@@ -22,7 +22,7 @@ export default function PresentationPage() {
     if (!query.trim()) return
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:8000/presentation/generate', {
+      const res = await axios.post('/api/presentation', {
         query: query,
         chat_history: []
       })
