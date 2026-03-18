@@ -1,0 +1,37 @@
+# Dependency directories
+node_modules/
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Database
+crm/crm.db
+data/*.csv
+data/*.xlsx
+data/*.pdf
+!data/Amazon Sales.csv
+
+# Large media / Recordings
+*.webp
+*.mp4
+*.png
+!README.md
+!*.JPG
+!*.pdf
