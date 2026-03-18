@@ -26,7 +26,11 @@ export default function PresentationPage() {
         query: query,
         chat_history: []
       })
-      setSlides(res.data.presentation.slides)
+      if (res.data && res.data.slides) {
+        setSlides(res.data.slides)
+      } else {
+        console.error("No slides returned", res.data)
+      }
     } catch (e) {
       console.error("Presentation generation failed")
     } finally {

@@ -322,7 +322,28 @@ async def presentation(req: dict):
     if app_state["df"] is None: raise HTTPException(404, "No dataset.")
     query = req.get("query", "Summarize findings")
     try:
-        data = generate_presentation_json(query, app_state["schema_json"], app_state["sample_rows"])
+        # Generate genuine intelligence using the LLM & SQL reasoning pipeline
+        llm_result = run_agentic_pipeline(
+            user_query=query,
+            schema_json=app_state["schema_json"],
+            sample_rows=app_state["sample_rows"],
+            chat_history=[]
+        )
+        if llm_result.get("error"):
+            raise HTTPException(400, f"Analysis Error: {llm_result['error']}")
+            
+        # Parse the JSON arrays from backend's build_figures into PPT format
+        result_df = llm_result.get("result_df")
+        charts_cfg = llm_result.get("charts", [])
+        serialized_charts = []
+        if result_df is not None and not result_df.empty:
+            figs = build_figures(result_df, charts_cfg)
+            fig_jsons = serialize_figures(figs)
+            for cfg, fig_json in zip(charts_cfg, fig_jsons):
+                serialized_charts.append({**cfg, "fig_json": fig_json})
+        llm_result["charts"] = serialized_charts
+        
+        data = generate_presentation_json(query, llm_result)
         return data
     except Exception as e:
         raise HTTPException(500, str(e))

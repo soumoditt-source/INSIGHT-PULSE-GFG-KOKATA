@@ -150,6 +150,23 @@ def run_agentic_pipeline(
         agent_meta["total_ms"] = int((time.time() - t_start) * 1000)
         return {**llm_result, "agent_metadata": agent_meta, "pathway": pathway}
 
+    intent = llm_result.get("intent", "")
+    if intent in ("general_ai", "document_qa") or not llm_result.get("sql"):
+        agent_meta["total_ms"] = int((time.time() - t_start) * 1000)
+        agent_meta["success"] = True
+        pathway.append("🗣️ Native Conversational / Document Engine engaged. Bypassing SQL.")
+        return {
+            "intent": intent,
+            "sql": None,
+            "result_df": None,
+            "charts": [],
+            "insights": llm_result.get("insights", []),
+            "followup_suggestions": llm_result.get("followup_suggestions", []),
+            "error": None,
+            "agent_metadata": agent_meta,
+            "pathway": pathway
+        }
+
     # Step 2: SQL Loop
     result_df, final_state, error = _handle_sql_loop(user_query, schema_json, llm_result, max_retries, pathway, document_context)
     
