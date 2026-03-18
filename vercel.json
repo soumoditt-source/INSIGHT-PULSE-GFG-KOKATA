@@ -1,9 +1,19 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/backend.py"
+      "src": "package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "api/backend.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/backend.py"
     }
   ]
 }
