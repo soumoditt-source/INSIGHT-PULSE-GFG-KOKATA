@@ -39,7 +39,7 @@ from core.sql_executor import init_connection, dataframe_to_records
 from core.agent import run_agentic_pipeline
 from crm.crm_db import log_query, init_db
 
-# ── Default dataset paths
+# ── Default dataset paths (Now inside the Python lambda package)
 DATA_DIR = Path(__file__).parent / "data"
 DEFAULT_CSVS = [
     DATA_DIR / "Amazon Sales.csv",
