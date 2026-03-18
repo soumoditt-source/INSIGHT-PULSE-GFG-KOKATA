@@ -174,13 +174,18 @@ async def startup():
 @app.get("/health")
 @api_router.get("/health")
 async def health():
-    _ensure_dataset_loaded()
-    df = app_state["df"]
+    try:
+        _ensure_dataset_loaded()
+    except Exception as e:
+        print(f"[WARN] health load failed: {e}")
+    df = app_state.get("df")
     return {
         "status": "healthy",
         "dataset_loaded": df is not None,
         "rows": len(df) if df is not None else 0,
-        "geo_detected": app_state["geo_info"]
+        "dataset_name": app_state.get("dataset_name", "Not loaded"),
+        "columns": len(df.columns) if df is not None else 0,
+        "geo_detected": app_state.get("geo_info", {})
     }
 
 @app.get("/schema")

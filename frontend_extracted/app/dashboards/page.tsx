@@ -27,7 +27,8 @@ export default function DashboardsPage() {
     setLoading(true)
     setError(null)
     try {
-      const h = await apiClient.getSystemStatus()
+      let h: any = null
+      try { h = await apiClient.getSystemStatus() } catch { h = { dataset_loaded: false } }
       setHealth(h)
       if (h?.dataset_loaded) {
         const [p, d, f] = await Promise.allSettled([
@@ -37,10 +38,10 @@ export default function DashboardsPage() {
         ])
         if (p.status === 'fulfilled') setProfile(p.value)
         if (d.status === 'fulfilled') setDistributions(d.value)
-        if (f.status === 'fulfilled') setForecast(f.value)
+        if (f.status === 'fulfilled') setForecast((f.value as any))
       }
-    } catch (e: any) {
-      setError(e.message)
+    } catch {
+      setHealth({ dataset_loaded: false })
     } finally {
       setLoading(false)
     }
