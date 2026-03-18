@@ -1,0 +1,157 @@
+[
+    {
+        "question": "What is claims_paid_ratio_no?",
+        "answer": "The claims_paid_ratio_no is the Settlement Ratio by Volume. It is calculated as: claims_paid_no ÷ total_claims_no. A value of 0.98 means 98% of all claims (by count) were successfully settled and paid. Higher is better. IRDAI requires insurers to maintain this above 0.95 (95%).",
+        "category": "Data Dictionary",
+        "tags": [
+            "ratio",
+            "paid",
+            "settlement",
+            "KPI"
+        ]
+    },
+    {
+        "question": "What is repudiation? How is it different from rejection?",
+        "answer": "Repudiation: A claim is formally denied AFTER a full investigation. The insurer found a valid contractual reason to deny the claim (e.g., fraud, non-disclosure of pre-existing condition). This is reflected in claims_repudiated_no.\n\nRejection: A claim is rejected UPFRONT due to technical or procedural invalidity (e.g., missing documents, wrong form). Reflected in claims_rejected_no.\n\nKey difference: Repudiation happens after investigation; rejection happens before.",
+        "category": "Business Terms",
+        "tags": [
+            "repudiation",
+            "rejection",
+            "denial",
+            "claims"
+        ]
+    },
+    {
+        "question": "Which insurer has the highest settlement ratio?",
+        "answer": "Based on the dataset, you can find this by asking: 'Rank all insurers by claims paid ratio descending'. The claims_paid_ratio_no column shows the settlement ratio for each insurer per year. Top performers typically exceed 0.99 (99%).",
+        "category": "Analysis Guidance",
+        "tags": [
+            "ranking",
+            "best insurer",
+            "settlement ratio"
+        ]
+    },
+    {
+        "question": "What does claims_intimated_no mean?",
+        "answer": "claims_intimated_no is the number of NEW death claims formally reported (intimated) to the insurance company during the reporting period. It represents fresh claims that entered the processing pipeline this year.",
+        "category": "Data Dictionary",
+        "tags": [
+            "intimated",
+            "new claims",
+            "reported"
+        ]
+    },
+    {
+        "question": "What years does this dataset cover?",
+        "answer": "The dataset covers multiple Indian financial years including 2021-22, 2022-23, and 2023-24. Indian financial years run from April 1 to March 31.",
+        "category": "Dataset Overview",
+        "tags": [
+            "years",
+            "time period",
+            "financial year"
+        ]
+    },
+    {
+        "question": "What is the category column?",
+        "answer": "The category column classifies the type of death claim: 'Individual Death Claim' (policy held by a single person) vs 'Group Death Claim' (policy under a group scheme, e.g., employer). This dataset primarily contains Individual Death Claims.",
+        "category": "Data Dictionary",
+        "tags": [
+            "category",
+            "individual",
+            "group"
+        ]
+    },
+    {
+        "question": "How are amounts measured in this dataset?",
+        "answer": "All monetary columns (claims_paid_amt, claims_intimated_amt, etc.) are measured in INR Crore (Indian Rupees). 1 Crore = 10 million rupees.",
+        "category": "Data Dictionary",
+        "tags": [
+            "amounts",
+            "units",
+            "crore",
+            "INR"
+        ]
+    },
+    {
+        "question": "What is claims_pending_ratio_no?",
+        "answer": "claims_pending_ratio_no = claims_pending_end_no ÷ total_claims_no. It shows what fraction of total claims remained unresolved at the end of the period. Lower is better (ideally < 0.01, meaning less than 1% backlog).",
+        "category": "Data Dictionary",
+        "tags": [
+            "pending",
+            "backlog",
+            "ratio"
+        ]
+    },
+    {
+        "question": "What is IRDAI?",
+        "answer": "IRDAI stands for Insurance Regulatory and Development Authority of India. It is the apex regulatory body governing all insurance entities in India. IRDAI sets benchmarks for claim settlement ratios and monitors insurance companies to protect policyholders.",
+        "category": "Industry Knowledge",
+        "tags": [
+            "IRDAI",
+            "regulator",
+            "India",
+            "insurance"
+        ]
+    },
+    {
+        "question": "How many insurers are in this dataset?",
+        "answer": "The dataset contains approximately 50 life insurance companies operating in India. These include both public sector insurers (like LIC) and private sector insurers (like ABSL, Aegon, Bajaj Allianz, HDFC Life, etc.).",
+        "category": "Dataset Overview",
+        "tags": [
+            "insurers",
+            "count",
+            "companies"
+        ]
+    },
+    {
+        "question": "What does claims_unclaimed_no mean?",
+        "answer": "claims_unclaimed_no represents approved claims where the settlement amount has been determined by the insurer but the beneficiary has not yet come forward to collect the payment. These amounts are often transferred to a special fund after a defined period.",
+        "category": "Data Dictionary",
+        "tags": [
+            "unclaimed",
+            "beneficiary",
+            "settlement"
+        ]
+    },
+    {
+        "question": "How do I use this dashboard?",
+        "answer": "Simply type your business question in the chat box. Examples:\n* 'Show top 5 insurers by paid ratio'\n* 'Claims trend by year as a line chart'\n* 'Heatmap of repudiation ratios'\n\nThe AI will automatically generate a SQL query, execute it, and display an interactive chart with insights. You can also upload your own CSV file and ask questions about it!",
+        "category": "User Guide",
+        "tags": [
+            "how to use",
+            "guide",
+            "getting started"
+        ]
+    },
+    {
+        "question": "Can I upload my own data?",
+        "answer": "Yes! Click 'Upload Custom CSV' in the sidebar. After uploading, the system auto-detects all columns and makes them available for querying. You can then ask natural language questions about your own dataset. The system works with any tabular CSV file.",
+        "category": "User Guide",
+        "tags": [
+            "upload",
+            "CSV",
+            "custom data"
+        ]
+    },
+    {
+        "question": "What chart types are available?",
+        "answer": "InsightPulse AI auto-selects the best chart type:\n* Bar / Horizontal Bar -> Rankings\n* Line -> Trends over time\n* Pie / Donut -> Proportions\n* Heatmap -> 2D matrices (insurer × year)\n* Scatter -> Correlations\n* Treemap -> Hierarchical data\n* Radar -> Multi-metric comparisons\n* Table -> Raw data view",
+        "category": "User Guide",
+        "tags": [
+            "charts",
+            "visualization",
+            "chart types"
+        ]
+    },
+    {
+        "question": "How can I save a dashboard I like?",
+        "answer": "Click the [STAR] 'Star This Dashboard' button below any generated dashboard. It will be saved to your session's Starred Dashboards page, where you can add notes and revisit it anytime.",
+        "category": "User Guide",
+        "tags": [
+            "save",
+            "star",
+            "history",
+            "bookmark"
+        ]
+    }
+]

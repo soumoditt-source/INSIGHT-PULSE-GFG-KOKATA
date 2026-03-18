@@ -1,37 +1,17 @@
-# Dependency directories
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.npmrc
+.snowflake/
+.v0-trash/
+.vercel/
+next.user-config.*
+
+# Environment variables
+.env*.local
+
+# Common ignores
 node_modules/
-venv/
-env/
-__pycache__/
-*.pyc
-.pytest_cache/
-
-# Environment secrets
-.env
-.env.*
-!.env.example
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Build outputs
-dist/
-build/
 .next/
-out/
-
-# Database
-crm/crm.db
-data/*.csv
-data/*.xlsx
-data/*.pdf
-!data/Amazon Sales.csv
-
-# Large media / Recordings
-*.webp
-*.mp4
-*.png
-!README.md
-!*.JPG
-!*.pdf
+.DS_Store

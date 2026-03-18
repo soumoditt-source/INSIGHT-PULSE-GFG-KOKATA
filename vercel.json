@@ -1,19 +1,9 @@
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "frontend_extracted/package.json",
-      "use": "@vercel/next"
-    },
-    {
-      "src": "InsightPulse_AI/backend.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "InsightPulse_AI/backend.py"
+      "source": "/api/(.*)",
+      "destination": "/api/backend.py"
     }
   ]
 }

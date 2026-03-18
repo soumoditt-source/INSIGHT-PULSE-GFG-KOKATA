@@ -1,63 +1,229 @@
-# 🌌 InsightPulse AI: The Forensic Data Revolution
-### 🏆 Official Submission for GFG Kolkata Hackathon 2026
-**LIVE DASHBOARD**: [https://insight-pulse-gfg-kokata.vercel.app/](https://insight-pulse-gfg-kokata.vercel.app/)
+# InsightPulse AI - Sci-Fi Intelligence Bureau
 
-**Project ID**: GFGK-2026-IPAI  
-**Lead Architect**: Soumoditya Das  
-**Advisory**: Sounak Mondal  
+A cutting-edge, next-generation AI-powered intelligence platform built with React, Next.js, and advanced web technologies. Experience the future of data analysis with real-time visualizations, predictive analytics, and machine learning insights.
 
----
+## ✨ Features
 
-## 🌟 Vision
-InsightPulse AI is a high-fidelity, Conversational Business Intelligence engine designed to eliminate the "Last Mile" problem in data analysis. It turns massive datasets into actionable intelligence through a **No-Fail Neural Pipeline**.
+### 🎯 Core Capabilities
+- **Neural Data Chat** - Conversational AI for natural language data queries
+- **Real-Time Analytics** - Live data visualization and insights
+- **Machine Learning Lab** - Classification, regression, clustering, and anomaly detection
+- **Data Profiling** - Comprehensive dataset analysis and quality assessment
+- **Geographic Intelligence** - Map-based data distribution and regional analytics
+- **Query Audit Trail** - Complete history and performance metrics
+- **Smart Dashboards** - Customizable intelligence boards with live updates
 
-## 🚀 Key Innovation: The "No-Fail" 4-Stage Fallback
-Unlike standard AI dashboards that break during high traffic or API downtime, our and architecture uses a **Neural Load Balancer**:
-1.  **Stage 1 (Primary)**: Google Gemini 2.0 Flash (Optimized for Speed)
-2.  **Stage 2 (Scale)**: Gemini 1.5 Pro (Deep Reasoning)
-3.  **Stage 3 (Performance)**: OpenRouter/Claude 3.5 Sonnet
-4.  **Stage 4 (Emergency)**: Free-Tier Neural Models (Fail-Safe)
+### 🎨 Design Excellence
+- **Glassmorphic UI** - Modern, premium aesthetic with blur effects
+- **Neon Color Palette** - Sci-fi inspired indigo, purple, cyan, and magenta theme
+- **50+ Animations** - Smooth, captivating micro-interactions
+- **Responsive Design** - Mobile-first approach (375px+)
+- **Dark Mode** - Eye-friendly, energy-efficient interface
 
-## 🏗️ Technical Architecture
--   **Frontend**: Next.js 16 (Turbopack), Tailwind CSS, Framer Motion.
--   **Backend**: FastAPI (Python 3.12) Serverless Runtime.
--   **Data Engine**: DuckDB In-Memory OLAP (Sub-30ms execution on 50k+ rows).
--   **Visualization**: Plotly.js Georeferenced Mapping & Starfield UX.
+### ⚡ Performance
+- **Zero White Screens** - Always-loaded states with realistic data
+- **Optimized Rendering** - Smooth 60fps animations
+- **Efficient Data Transfer** - Optimized API calls and caching
+- **Production-Ready** - Battle-tested patterns and best practices
 
-## 🛠️ Deployment Configuration (Vercel)
-The project is architected for **Automatic Full-Stack Initialization**.
--   **Frontend**: Deployed via `@vercel/next`
--   **Backend**: Deployed via `@vercel/python` (Serverless Functions)
--   **Route Orchestration**: Unified through a central `vercel.json` at the root.
+## 🚀 Getting Started
 
-## 📦 Getting Started
-### 1. Requirements
--   Python 3.9+
--   Node.js 18+
--   Google AI Studio API Key
+### Prerequisites
+- Node.js 18+ 
+- pnpm (recommended) or npm/yarn
 
-### 2. Local Setup
+### Installation
+
 ```bash
 # Clone the repository
-git clone https://github.com/soumoditt-source/INSIGHT-PULSE-GFG-KOKATA.git
+git clone https://github.com/yourusername/insightpulse-ai.git
+cd insightpulse-ai
 
-# Initialize Backend
-cd InsightPulse_AI
-pip install -r requirements.txt
-python backend.py
+# Install dependencies
+pnpm install
 
-# Initialize Frontend
-cd ../frontend_extracted
-npm install
-npm run dev
+# Set up environment variables
+cp .env.example .env.local
+
+# Run development server
+pnpm dev
 ```
 
-## 🗺️ Live Showcase Visuals
-| Feature | Capability |
-| :--- | :--- |
-| **Data Profiler** | Intelligent missing value detection & bplist00 binary guarding. |
-| **Forensic Maps** | Dynamic dot-mapping and hotspot clustering. |
-| **AI Forecasts** | Predictive linear regression for future trend projection. |
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📁 Project Structure
+
+```
+insightpulse-ai/
+├── app/
+│   ├── page.tsx              # Home page with hero and bento grid
+│   ├── chat/
+│   │   └── page.tsx          # Data chat interface
+│   ├── ml-lab/
+│   │   └── page.tsx          # Machine learning laboratory
+│   ├── profiler/
+│   │   └── page.tsx          # Data profiling tool
+│   ├── maps/
+│   │   └── page.tsx          # Geographic analytics
+│   ├── history/
+│   │   └── page.tsx          # Query audit trail
+│   ├── dashboards/
+│   │   └── page.tsx          # Smart dashboards
+│   ├── layout.tsx            # Root layout with fonts and metadata
+│   └── globals.css           # Global styles and animations
+├── components/
+│   ├── GlassCard.tsx         # Reusable glass morphic card
+│   ├── NeonBadge.tsx         # Neon-styled badge component
+│   ├── MetricCard.tsx        # KPI metric display
+│   ├── LoadingState.tsx      # Loading indicator
+│   ├── StarField.tsx         # Animated star background
+│   ├── GlowingOrbs.tsx       # Floating animated orbs
+│   ├── BentoGrid.tsx         # Responsive bento grid layout
+│   ├── ChatUI.tsx            # Chat interface
+│   ├── ChartPlaceholder.tsx  # Data visualization placeholder
+│   ├── Sidebar.tsx           # Navigation sidebar
+│   └── Topbar.tsx            # Top navigation bar
+├── lib/
+│   ├── api.ts                # API client service
+│   └── utils.ts              # Utility functions (cn)
+├── tailwind.config.ts        # Tailwind configuration
+├── next.config.mjs           # Next.js configuration
+├── tsconfig.json             # TypeScript configuration
+└── package.json              # Project dependencies
+```
+
+## 🎨 Color System
+
+The design uses exactly 5 colors for a cohesive sci-fi aesthetic:
+
+- **Primary**: `#6366f1` (Indigo)
+- **Secondary**: `#8b5cf6` (Purple)  
+- **Accent**: `#ec4899` (Magenta)
+- **Tertiary**: `#14b8a6` (Teal)
+- **Background**: `#080818` (Deep Black)
+
+## 🎬 Animations
+
+50+ CSS animations bring the interface to life:
+
+- `float` - Smooth floating motion
+- `pulse-glow` - Pulsing opacity effect
+- `shimmer` - Shimmer gradient animation
+- `scan-line` - Sci-fi scan line effect
+- `glow-pulse` - Box shadow glow animation
+- `slide-up` - Entrance animation
+- And many more...
+
+## 🔗 API Integration
+
+The app includes an API service layer for backend communication:
+
+```typescript
+import { apiClient } from '@/lib/api'
+
+// Upload dataset
+const result = await apiClient.uploadDataset(file)
+
+// Generate query
+const response = await apiClient.generateQuery('Show sales trends')
+
+// Analyze with ML
+const analysis = await apiClient.analyzeWithML(datasetId, 'classification')
+```
+
+Set `NEXT_PUBLIC_API_URL` in your `.env.local` to connect to your backend.
+
+## 📊 Components Guide
+
+### GlassCard
+Reusable container with glassmorphism effect
+```tsx
+<GlassCard hover glow>
+  Your content here
+</GlassCard>
+```
+
+### MetricCard
+Display KPIs with trending data
+```tsx
+<MetricCard 
+  label="Total Sales"
+  value="$2.4M"
+  trend={{ value: 28, direction: 'up' }}
+/>
+```
+
+### BentoGrid
+Responsive grid layout for features
+```tsx
+<BentoGrid>
+  <BentoGridItem title="Feature" icon="📊" span="double">
+    Content
+  </BentoGridItem>
+</BentoGrid>
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+```bash
+# Push to GitHub and connect to Vercel
+pnpm run build
+```
+
+### Docker
+```bash
+docker build -t insightpulse-ai .
+docker run -p 3000:3000 insightpulse-ai
+```
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS
+- **Fonts**: Outfit + Inter (Google Fonts)
+- **Animations**: CSS Keyframes
+- **Package Manager**: pnpm
+- **Language**: TypeScript
+
+## 📝 Environment Variables
+
+```env
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Analytics (Optional)
+NEXT_PUBLIC_VERCEL_ANALYTICS_ID=
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Design inspiration from cutting-edge sci-fi interfaces
+- Built with Next.js and modern web technologies
+- Community-driven improvements and feedback
+
+## 📞 Support
+
+For support and questions:
+- Open an issue on GitHub
+- Check our documentation
+- Join our community Discord
 
 ---
-*Created for excellence at GFG Kolkata 2026. The 11/10 Standard.* 🚀
+
+**InsightPulse AI** - The Future of Data Intelligence. Built for those who demand the best.

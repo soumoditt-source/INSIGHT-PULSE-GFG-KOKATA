@@ -1,0 +1,35 @@
+# InsightPulse AI — Gitignore
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.env
+.env.local
+.venv/
+venv/
+env/
+
+# Data files (large)
+data/crm.db
+data/*.db
+data/uploads/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
