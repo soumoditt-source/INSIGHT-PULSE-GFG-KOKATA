@@ -14,10 +14,6 @@
     {
       "src": "/api/(.*)",
       "dest": "InsightPulse_AI/backend.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend_extracted/$1"
     }
   ]
 }

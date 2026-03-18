@@ -14,7 +14,9 @@ export class APIClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const cleanBase = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+    const url = `${cleanBase}${cleanEndpoint}`
     
     try {
       const response = await fetch(url, {
