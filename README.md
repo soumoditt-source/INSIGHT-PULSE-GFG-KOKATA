@@ -1,5 +1,6 @@
 # 🌌 InsightPulse AI: The Forensic Data Revolution
 ### 🏆 Official Submission for GFG Kolkata Hackathon 2026
+**LIVE DASHBOARD**: [https://insight-pulse-gfg-kokata.vercel.app/](https://insight-pulse-gfg-kokata.vercel.app/)
 
 **Project ID**: GFGK-2026-IPAI  
 **Lead Architect**: Soumoditya Das  
