@@ -95,12 +95,19 @@ def _read_csv_resilient(data: bytes, filename: str = "") -> pd.DataFrame:
         raise ValueError(f"'{filename}' is a Binary Plist (Mac format), not a spreadsheet.")
     if data.startswith(b'PK') and filename.lower().endswith(('.xlsx', '.xlsm')):
         return pd.read_excel(io.BytesIO(data))
-    for enc in ("utf-8", "utf-8-sig", "latin-1", "cp1252"):
+        
+    for enc in ("utf-8", "utf-8-sig", "mac_roman", "latin-1", "cp1252"):
         try:
             return pd.read_csv(io.BytesIO(data), encoding=enc)
-        except (UnicodeDecodeError, pd.errors.ParserError):
-            continue
-    raise ValueError(f"Cannot decode '{filename}'. Verify file encoding.")
+        except Exception:
+            try:
+                # Robust python engine for Apple/Windows weird delimiters
+                df = pd.read_csv(io.BytesIO(data), encoding=enc, sep=None, engine='python')
+                if df is not None: return df
+            except Exception:
+                continue
+                
+    raise ValueError(f"Cannot decode '{filename}'. It may be heavily fragmented or use an unknown encoding like iOS Numbers.")
 
 def _load_default_dataset() -> bool:
     for csv_path in DEFAULT_CSVS:

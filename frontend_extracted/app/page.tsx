@@ -9,8 +9,54 @@ import { NeonBadge } from '@/components/NeonBadge'
 import { MetricCard } from '@/components/MetricCard'
 import { HeroSection } from '@/components/HeroSection'
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 export default function Home() {
+  useEffect(() => {
+    const greet = () => {
+      if ('speechSynthesis' in window) {
+        setTimeout(() => {
+          const msg = new SpeechSynthesisUtterance(
+            "Welcome to Insight Pulse AI. The ultimate neural data intelligence platform. I am ready to perform a detail analysis on your data with supreme accuracy."
+          );
+          msg.lang = 'en-US';
+          msg.pitch = 1.2;
+          msg.rate = 1.0;
+          
+          let voices = window.speechSynthesis.getVoices();
+          let femaleVoice = voices.find(v => 
+            v.name.includes('Female') || 
+            v.name.includes('Samantha') || 
+            v.name.includes('Google US English') ||
+            v.name.includes('Zira')
+          );
+          if (femaleVoice) msg.voice = femaleVoice;
+          
+          window.speechSynthesis.speak(msg);
+        }, 500);
+      }
+    };
+    
+    // Autoplay policy bypass: trigger on first user interaction
+    const handleInteraction = () => {
+      greet();
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('scroll', handleInteraction);
+    };
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('scroll', handleInteraction);
+    
+    // Try to load voices early
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices();
+    }
+    
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('scroll', handleInteraction);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <StarField />
