@@ -108,7 +108,7 @@ export function DatasetUploader() {
 
       <input
         type="file"
-        accept=".csv,.xlsx,.xls"
+        accept=".csv,.xlsx,.xls,.pdf,.docx,.pptx"
         className="hidden"
         ref={fileInputRef}
         onChange={handleUpload}
@@ -122,7 +122,7 @@ export function DatasetUploader() {
           <span className="animate-pulse">Injecting Data...</span>
         ) : (
           <>
-            <span className="text-base">⏏️</span> Inject Custom CSV
+            <span className="text-base">⏏️</span> Inject Data (CSV/PDF)
           </>
         )}
       </button>

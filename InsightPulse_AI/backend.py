@@ -207,7 +207,14 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         if filename.endswith(".csv"): df = _read_csv_resilient(contents, file.filename)
         elif filename.endswith((".xlsx", ".xls")): df = pd.read_excel(io.BytesIO(contents))
-        else: raise HTTPException(400, "Unsupported format.")
+        else:
+            # Document Engine for unstructured data (PDF, PPTX, DOCX)
+            result = process_business_file(contents, file.filename)
+            if not result.get("structured_text") or "Extraction failed" in result["structured_text"]:
+                raise HTTPException(400, f"Unsupported format or parsing failed: {filename}")
+            # Wrap unstructured text into a single-row DataFrame for pipeline compatibility
+            df = pd.DataFrame([{"Document_Content": result["structured_text"]}])
+            
         _set_active_dataset(file.filename, contents)
         _load_dataframe_into_state(df, file.filename)
         return {"status": "success", "filename": file.filename, "rows": len(df)}
